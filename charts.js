@@ -9,18 +9,32 @@ charts.barChart = function (selector) {
 
   const barSize = 20;
   const padding = 2;
+  const margin = 10;
   const scale = 10;
+
+  let innerWidth = chartWidth - 2 * margin;
+  let innerHeight = chartHeight - 2 * margin;
 
   let svg = d3.select(selector).append('svg')
     .classed('bar-chart', true)
     .attr('width', chartWidth)
     .attr('height', chartHeight)
 
-  svg.selectAll('rect').data(data)
+  let content = svg.append('svg')
+    .attr('x', margin)
+    .attr('y', margin)
+    .attr('width', innerWidth)
+    .attr('height', innerHeight)
+
+  let scaleY = d3.scaleLinear()
+    .domain([0, d3.max(data)])
+    .range([0, innerHeight])
+
+  content.selectAll('rect').data(data)
     .enter().append('rect')
       .classed('bar', true)
       .attr('x', (d, i) => i * (barSize + padding))
-      .attr('y', d => chartHeight - d * scale)
+      .attr('y', d => innerHeight - scaleY(d))
       .attr('width', barSize)
-      .attr('height', d => d * scale)
+      .attr('height', scaleY)
 }
