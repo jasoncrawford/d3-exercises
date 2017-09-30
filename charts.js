@@ -10,14 +10,14 @@ charts.barChart = function (selector) {
   const margin = 10;
   const scale = 10;
   const lineHeight = 20;
-  const yearLabelHeight = 20;
+  const labelHeight = 20;
 
   const nYears = 25;
 
   let draw = data => {
 
     let innerWidth = data.length * (barWidth + padding);
-    let innerHeight = barHeight + yearLabelHeight;
+    let innerHeight = barHeight + 2 * labelHeight;
 
     let chartWidth = innerWidth + 2 * margin;
     let chartHeight = innerHeight + 2 * margin;
@@ -25,6 +25,8 @@ charts.barChart = function (selector) {
     let scaleY = d3.scaleLinear()
       .domain([0, d3.max(data, d => d.patents)])
       .range([0, barHeight])
+
+    let formatter = d3.formatPrefix('.0', 1e3)
 
     let svg = d3.select(selector).append('svg')
       .classed('bar-chart', true)
@@ -55,7 +57,7 @@ charts.barChart = function (selector) {
     selection.append('rect')
       .classed('bar', true)
       .attr('x', (d, i) => i * (barWidth + padding))
-      .attr('y', d => barHeight - scaleY(d.patents))
+      .attr('y', d => labelHeight + barHeight - scaleY(d.patents))
       .attr('width', barWidth)
       .attr('height', d => scaleY(d.patents))
 
@@ -64,6 +66,12 @@ charts.barChart = function (selector) {
       .attr('y', innerHeight)
       .attr('text-anchor', 'middle')
       .text(d => d.year)
+
+    selection.append('text')
+      .attr('x', (d, i) => i * (barWidth + padding) + (barWidth / 2))
+      .attr('y', d => labelHeight + barHeight - scaleY(d.patents) - padding)
+      .attr('text-anchor', 'middle')
+      .text(d => formatter(d.patents))
   }
 
   let transform = d => ({year: d['Calendar Year'], patents: +d['Utility Patents']})
