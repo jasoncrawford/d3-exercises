@@ -15,5 +15,9 @@ body {
 }
 
 .bar-chart .bar {
+  fill: green;
+}
+
+svg a {
   fill: blue;
 }
