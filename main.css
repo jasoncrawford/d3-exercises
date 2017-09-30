@@ -20,9 +20,21 @@ svg a {
 }
 
 .bar-chart .bar {
-  fill: #009688;
+  fill: #26a69a;
 }
 
 .bar-chart .label {
-  fill: hsl(0, 0%, 66%);
+  fill: #bdbdbd;
+}
+
+.bar-chart .bar-group {
+  cursor: pointer;
+}
+
+.bar-chart .bar-group:hover .bar {
+  fill: #009688;
+}
+
+.bar-chart .bar-group:hover .label {
+  fill: #424242;
 }

@@ -52,23 +52,26 @@ charts.barChart = function (selector) {
         .attr('y', 2 * lineHeight)
         .text('Source: Datazar')
 
-    let selection = content.selectAll('rect').data(data).enter()
+    let selection = content.selectAll('rect').data(data)
 
-    selection.append('rect')
+    let groups = selection.enter().append('g')
+      .classed('bar-group', true)
+
+    groups.append('rect')
       .classed('bar', true)
       .attr('x', (d, i) => i * (barWidth + padding))
       .attr('y', d => labelHeight + barHeight - scaleY(d.patents))
       .attr('width', barWidth)
       .attr('height', d => scaleY(d.patents))
 
-    selection.append('text')
+    groups.append('text')
       .classed('label', true)
       .attr('x', (d, i) => i * (barWidth + padding) + (barWidth / 2))
       .attr('y', innerHeight)
       .attr('text-anchor', 'middle')
       .text(d => d.year)
 
-    selection.append('text')
+    groups.append('text')
       .classed('label', true)
       .attr('x', (d, i) => i * (barWidth + padding) + (barWidth / 2))
       .attr('y', d => labelHeight + barHeight - scaleY(d.patents) - padding)
