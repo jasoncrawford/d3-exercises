@@ -8,6 +8,11 @@ html {
 
 body {
   font-family: sans-serif;
+  color: #424242;
+}
+
+svg a {
+  fill: #2196f3;
 }
 
 .bar-chart {
@@ -15,9 +20,9 @@ body {
 }
 
 .bar-chart .bar {
-  fill: green;
+  fill: #009688;
 }
 
-svg a {
-  fill: blue;
+.bar-chart .label {
+  fill: hsl(0, 0%, 66%);
 }

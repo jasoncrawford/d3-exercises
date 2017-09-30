@@ -62,12 +62,14 @@ charts.barChart = function (selector) {
       .attr('height', d => scaleY(d.patents))
 
     selection.append('text')
+      .classed('label', true)
       .attr('x', (d, i) => i * (barWidth + padding) + (barWidth / 2))
       .attr('y', innerHeight)
       .attr('text-anchor', 'middle')
       .text(d => d.year)
 
     selection.append('text')
+      .classed('label', true)
       .attr('x', (d, i) => i * (barWidth + padding) + (barWidth / 2))
       .attr('y', d => labelHeight + barHeight - scaleY(d.patents) - padding)
       .attr('text-anchor', 'middle')
