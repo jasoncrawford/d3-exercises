@@ -8,9 +8,12 @@ charts.barChart = function (selector) {
   const barWidth = 36;
   const padding = 8;
   const margin = 10;
-  const scale = 10;
   const lineHeight = 20;
   const labelHeight = 20;
+
+  const barDuration = 300;
+  const labelDuration = 200;
+  const barDelay = 20;
 
   const nYears = 25;
 
@@ -45,7 +48,7 @@ charts.barChart = function (selector) {
         .attr('y', 2 * lineHeight)
         .text('Source: Datazar')
 
-    let selection = content.selectAll('rect').data(data)
+    let selection = content.selectAll('rect').data(data);
 
     let groups = selection.enter().append('g')
       .classed('bar-group', true)
@@ -53,9 +56,14 @@ charts.barChart = function (selector) {
     groups.append('rect')
       .classed('bar', true)
       .attr('x', (d, i) => i * (barWidth + padding))
-      .attr('y', d => labelHeight + barHeight - scaleY(d.patents))
       .attr('width', barWidth)
-      .attr('height', d => scaleY(d.patents))
+      .attr('y', d => labelHeight + barHeight)
+      .attr('height', 0)
+      .transition()
+        .delay((d, i) => i * barDelay)
+        .duration(barDuration)
+        .attr('y', d => labelHeight + barHeight - scaleY(d.patents))
+        .attr('height', d => scaleY(d.patents))
 
     groups.append('text')
       .classed('label', true)
@@ -70,6 +78,11 @@ charts.barChart = function (selector) {
       .attr('y', d => labelHeight + barHeight - scaleY(d.patents) - padding)
       .attr('text-anchor', 'middle')
       .text(d => formatter(d.patents))
+      .style('opacity', 0)
+      .transition()
+        .delay((d, i) => barDuration - labelDuration + i * barDelay)
+        .duration(labelDuration)
+        .style('opacity', 1)
   }
 
   let transform = d => ({year: d['Calendar Year'], patents: +d['Utility Patents']})
