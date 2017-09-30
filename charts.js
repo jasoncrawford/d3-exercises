@@ -36,6 +36,7 @@ charts.barChart = function (selector) {
       .attr('transform', `translate(${margin}, ${margin})`)
 
     content.append('text')
+      .classed('header', true)
       .attr('x', 0)
       .attr('y', lineHeight)
       .text(`US utility patents, ${data[0].year} to ${data[data.length-1].year}`)
