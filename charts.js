@@ -4,23 +4,27 @@ let charts = window.charts;
 charts.barChart = function (selector) {
   let data = [1, 1, 2, 3, 5, 8, 13];
 
-  const barSize = 20;
-  const padding = 2;
+  const barHeight = 400;
+  const barWidth = 36;
+  const padding = 8;
   const margin = 10;
   const scale = 10;
   const lineHeight = 20;
+  const yearLabelHeight = 20;
 
-  const nYears = 30;
+  const nYears = 25;
 
   let draw = data => {
-    let innerWidth = data.length * (barSize + padding);
-    let innerHeight = 400;
+
+    let innerWidth = data.length * (barWidth + padding);
+    let innerHeight = barHeight + yearLabelHeight;
+
     let chartWidth = innerWidth + 2 * margin;
     let chartHeight = innerHeight + 2 * margin;
 
     let scaleY = d3.scaleLinear()
       .domain([0, d3.max(data, d => d.patents)])
-      .range([0, innerHeight])
+      .range([0, barHeight])
 
     let svg = d3.select(selector).append('svg')
       .classed('bar-chart', true)
@@ -46,13 +50,20 @@ charts.barChart = function (selector) {
         .attr('y', 2 * lineHeight)
         .text('Source: Datazar')
 
-    content.selectAll('rect').data(data)
-      .enter().append('rect')
-        .classed('bar', true)
-        .attr('x', (d, i) => i * (barSize + padding))
-        .attr('y', d => innerHeight - scaleY(d.patents))
-        .attr('width', barSize)
-        .attr('height', d => scaleY(d.patents))
+    let selection = content.selectAll('rect').data(data).enter()
+
+    selection.append('rect')
+      .classed('bar', true)
+      .attr('x', (d, i) => i * (barWidth + padding))
+      .attr('y', d => barHeight - scaleY(d.patents))
+      .attr('width', barWidth)
+      .attr('height', d => scaleY(d.patents))
+
+    selection.append('text')
+      .attr('x', (d, i) => i * (barWidth + padding) + (barWidth / 2))
+      .attr('y', innerHeight)
+      .attr('text-anchor', 'middle')
+      .text(d => d.year)
   }
 
   let transform = d => ({year: d['Calendar Year'], patents: +d['Utility Patents']})
