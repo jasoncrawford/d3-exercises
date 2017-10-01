@@ -93,3 +93,35 @@ charts.barChart = function (selector) {
     draw(data);
   })
 }
+
+charts.globe = function (selector) {
+  const radius = 250;
+  const diameter = 2 * radius;
+  const margin = 20;
+
+  let svg = d3.select(selector).append('svg')
+    .classed('globe', true)
+    .attr('width', diameter + 2 * margin)
+    .attr('height', diameter + 2 * margin)
+
+  let content = svg.append('g')
+    .attr('transform', `translate(${margin}, ${margin})`)
+
+  const url = "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json";
+
+  d3.json(url, data => {
+    let projection = d3.geoOrthographic()
+      .translate([radius, radius]);
+    let path = d3.geoPath(projection);
+
+    content.append('circle')
+      .classed('sphere', true)
+      .attr('cx', radius)
+      .attr('cy', radius)
+      .attr('r', radius)
+
+    content.append('path')
+      .classed('country-path', true)
+      .attr('d', path(data))
+  })
+}
