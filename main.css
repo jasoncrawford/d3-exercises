@@ -45,18 +45,16 @@ svg a {
   fill: #424242;
 }
 
-.globe .sphere,
-.globe .graticule {
-  stroke: #4fc3f7;
-}
-
 .globe .sphere {
   fill: #81d4fa;
+  stroke: none;
 }
 
 .globe .graticule {
+  stroke: #4fc3f7;
   fill: none;
 }
+
 .globe .country-path {
   fill: #ece4ad;
   stroke: #b7af79;
