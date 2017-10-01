@@ -110,9 +110,11 @@ charts.globe = function (selector) {
   const url = "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json";
 
   d3.json(url, data => {
+    const tilt = -15;
+
     let projection = d3.geoOrthographic()
-      .translate([radius, radius]);
-    let path = d3.geoPath(projection);
+      .translate([radius, radius])
+      .rotate([0, tilt])
 
     content.append('circle')
       .classed('sphere', true)
@@ -120,8 +122,38 @@ charts.globe = function (selector) {
       .attr('cy', radius)
       .attr('r', radius)
 
-    content.append('path')
+    let graticulePath = content.append('path')
+      .classed('graticule', true)
+      .datum(d3.geoGraticule())
+      .attr('d', d3.geoPath(projection))
+
+    let countryPath = content.append('path')
       .classed('country-path', true)
-      .attr('d', path(data))
+      .datum(data)
+      .attr('d', d3.geoPath(projection))
+
+    let dragStart = null;
+    let rotStart = null;
+
+    svg.on('mousedown', function () {
+      dragStart = d3.mouse(this);
+      rotStart = projection.rotate();
+    });
+
+    svg.on('mousemove', function () {
+      if (!dragStart) return;
+      let current = d3.mouse(this);
+      let dx = current[0] - dragStart[0];
+      let degrees = dx * 0.25;
+      projection.rotate([rotStart[0] + degrees, tilt]);
+
+      graticulePath.attr('d', d3.geoPath(projection));
+      countryPath.attr('d', d3.geoPath(projection));
+    })
+
+    svg.on('mouseup', function () {
+      dragStart = null;
+      rotStart = null;
+    })
   })
 }
