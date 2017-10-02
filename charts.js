@@ -163,6 +163,16 @@ charts.scatterPlot = function (selector) {
   const height = 600;
   const margin = 40;
 
+  const yearStart = 1950;
+  const yearEnd = 2008;
+
+  let years = d3.range(yearEnd, yearStart - 1, -1);
+  let yearSelect = d3.select('#year-selector');
+  let yearOptions = yearSelect.selectAll('option').data(years)
+  yearOptions.enter().append('option')
+    .attr('value', d => d)
+    .text(d => d)
+
   let svg = d3.select(selector).append('svg')
     .classed('scatter-plot', true)
     .attr('width', width + 2 * margin)
@@ -171,16 +181,20 @@ charts.scatterPlot = function (selector) {
   let content = svg.append('g')
     .attr('transform', `translate(${margin}, ${margin})`)
 
-  let draw = data => {
-    data = data.filter(d => !isNaN(d.life) && !isNaN(d.gdp));
+  let scaleX, scaleY;
+  let setScaleAndAxes = () => {
+    let allPoints = d3.merge(d3.values(dataByYear).map(byCountry => d3.values(byCountry)));
+    allPoints = allPoints.filter(d => !isNaN(d.life) && !isNaN(d.gdp));
+    let lifeValues = allPoints.map(d => d.life);
+    let gdpValues = allPoints.map(d => d.gdp);
 
-    let scaleX = d3.scaleLinear()
-      .domain([d3.min(data, d => d.life), d3.max(data, d => d.life)])
+    scaleX = d3.scaleLinear()
+      .domain([d3.min(lifeValues), d3.max(lifeValues)])
       .range([0, width])
       .nice()
 
-    let scaleY = d3.scaleLinear()
-      .domain([d3.min(data, d => d.gdp), d3.max(data, d => d.gdp)])
+    scaleY = d3.scaleLinear()
+      .domain([d3.min(gdpValues), d3.max(gdpValues)])
       .range([height, 0])
       .nice()
 
@@ -192,8 +206,15 @@ charts.scatterPlot = function (selector) {
       .call(xAxis);
 
     content.append('g').call(yAxis);
+  }
 
-    let selection = content.selectAll('circle.point').data(data);
+  let draw = () => {
+    let year = years[yearSelect.node().selectedIndex];
+    data = d3.values(dataByYear[year])
+    data = data.filter(d => !isNaN(d.life) && !isNaN(d.gdp));
+
+    let selection = content.selectAll('circle.point')
+      .data(data);
 
     selection.enter().append('circle')
       .classed('point', true)
@@ -211,6 +232,12 @@ charts.scatterPlot = function (selector) {
       .on('mouseout', function (d, i) {
         content.selectAll('text.label').remove();
       })
+
+    selection.transition()
+      .attr('cx', d => scaleX(d.life))
+      .attr('cy', d => scaleY(d.gdp))
+
+    selection.exit().remove();
   }
 
   // Ultimate format will be like:
@@ -229,12 +256,13 @@ charts.scatterPlot = function (selector) {
       row => ({
         key: row['Code'],
         name: row['Entity'],
-        year: row['Year'],
+        year: +row['Year'],
         life: +row['Life Expectancy at Birth (both genders)']
       }),
       data => {
         data.forEach(row => {
           if (!row.year || !row.name || !row.life) return;
+          if (row.year < yearStart || row.year > yearEnd) return;
 
           let byYear = dataByYear[row.year];
           if (!byYear) byYear = dataByYear[row.year] = {};
@@ -253,8 +281,8 @@ charts.scatterPlot = function (selector) {
   q.defer(done => {
     d3.csv('data/gdp.csv', data => {
       data.forEach(row => {
-        let year = row['Year'];
-        if (!year) return;
+        let year = +row['Year'];
+        if (!year || isNaN(year) || year < yearStart || year > yearEnd) return;
 
         let byYear = dataByYear[year];
         if (!byYear) byYear = dataByYear[year] = {};
@@ -277,5 +305,9 @@ charts.scatterPlot = function (selector) {
     })
   })
 
-  q.await(() => draw(d3.values(dataByYear['2008'])))
+  q.await(() => {
+    setScaleAndAxes();
+    yearSelect.on('change', () => draw());
+    draw();
+  })
 }
