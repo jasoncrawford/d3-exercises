@@ -253,14 +253,14 @@ charts.scatterPlot = function (selector) {
     selection.exit().remove();
   }
 
-  let debouncedDraw = _.debounce(draw, 50);
+  let throttledDraw = _.throttle(draw, 100);
 
   handle.call(d3.drag().on('drag', () => {
     let x = d3.event.x;
     if (x < 0) x = 0;
     if (x > width) x = width;
     d3.select('.slider-handle').attr('cx', x);
-    debouncedDraw();
+    throttledDraw();
   }))
 
   // Ultimate format will be like:
