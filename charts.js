@@ -161,25 +161,34 @@ charts.globe = function (selector) {
 charts.scatterPlot = function (selector) {
   const width = 600;
   const height = 600;
-  const margin = 40;
+  const margin = {top: 80, right: 20, bottom: 30, left: 40};
 
   const yearStart = 1950;
   const yearEnd = 2008;
-
   let years = d3.range(yearEnd, yearStart - 1, -1);
-  let yearSelect = d3.select('#year-selector');
-  let yearOptions = yearSelect.selectAll('option').data(years)
-  yearOptions.enter().append('option')
-    .attr('value', d => d)
-    .text(d => d)
 
   let svg = d3.select(selector).append('svg')
     .classed('scatter-plot', true)
-    .attr('width', width + 2 * margin)
-    .attr('height', height + 2 * margin)
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+
+  let scaleYear = d3.scaleLinear()
+    .domain([yearStart, yearEnd])
+    .range([0, width])
+
+  let yearAxis = d3.axisTop(scaleYear).tickFormat(d3.format('0'));
+  let yearSlider = svg.append('g')
+    .attr('transform', `translate(${margin.left}, 40)`);
+
+  yearSlider.call(yearAxis)
+  let handle = yearSlider.append('circle')
+    .classed('slider-handle', true)
+    .attr('cx', 0)
+    .attr('cy', 0)
+    .attr('r', 5)
 
   let content = svg.append('g')
-    .attr('transform', `translate(${margin}, ${margin})`)
+    .attr('transform', `translate(${margin.left}, ${margin.top})`)
 
   let scaleX, scaleY;
   let setScaleAndAxes = () => {
@@ -208,9 +217,13 @@ charts.scatterPlot = function (selector) {
     content.append('g').call(yAxis);
   }
 
+  let lastYearDrawn = null;
   let draw = () => {
-    let year = years[yearSelect.node().selectedIndex];
-    data = d3.values(dataByYear[year])
+    let year = parseInt(scaleYear.invert(handle.attr('cx')));
+    if (year === lastYearDrawn) return;
+    lastYearDrawn = year;
+
+    data = d3.values(dataByYear[year]);
     data = data.filter(d => !isNaN(d.life) && !isNaN(d.gdp));
 
     let selection = content.selectAll('circle.point')
@@ -239,6 +252,13 @@ charts.scatterPlot = function (selector) {
 
     selection.exit().remove();
   }
+
+  handle.call(d3.drag().on('drag', () => {
+    let x = d3.event.x;
+    if (x < 0 || x > width) return;
+    d3.select('.slider-handle').attr('cx', x);
+    draw();
+  }))
 
   // Ultimate format will be like:
   //
@@ -291,6 +311,7 @@ charts.scatterPlot = function (selector) {
           if (!entry.key || !entry.value) return;
           if (entry.key === 'Year') return;
           let name = entry.key.trim();
+          if (name === 'Qatar' || name === 'Kuwait') return;  // These two are GDP outliers
 
           let country = byYear[name];
           if (!country) country = byYear[name] = {};
@@ -307,7 +328,6 @@ charts.scatterPlot = function (selector) {
 
   q.await(() => {
     setScaleAndAxes();
-    yearSelect.on('change', () => draw());
     draw();
   })
 }
