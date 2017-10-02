@@ -185,10 +185,12 @@ charts.scatterPlot = function (selector) {
     let scaleX = d3.scaleLinear()
       .domain([d3.min(data, d => d.life), d3.max(data, d => d.life)])
       .range([0, width])
+      .nice()
 
     let scaleY = d3.scaleLinear()
       .domain([d3.min(data, d => d.gdp), d3.max(data, d => d.gdp)])
       .range([height, 0])
+      .nice()
 
     let xAxis = d3.axisBottom(scaleX);
     let yAxis = d3.axisLeft(scaleY).tickFormat(d3.format('$.0s'));
