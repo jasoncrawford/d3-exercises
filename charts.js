@@ -171,14 +171,6 @@ charts.scatterPlot = function (selector) {
   let content = svg.append('g')
     .attr('transform', `translate(${margin}, ${margin})`)
 
-  // {Entity: "Albania", Code: "ALB", Year: "2008", Life Expectancy at Birth: "76.281", GDP per capita: "5010.031778"}
-  let transform = row => ({
-    key: row['Code'],
-    name: row['Entity'],
-    life: +row['Life Expectancy at Birth'],
-    gdp: +row['GDP per capita'],
-  })
-
   let draw = data => {
     data = data.filter(d => !isNaN(d.life) && !isNaN(d.gdp));
 
@@ -221,5 +213,69 @@ charts.scatterPlot = function (selector) {
       })
   }
 
-  d3.csv('data/country-data.csv', transform, draw);
+  // Ultimate format will be like:
+  //
+  // dataByYear = {
+  //   '2010': {
+  //     'Albania': {life: ..., gdp: ...}
+  //   }
+  // }
+  let dataByYear = {};
+
+  let q = d3.queue();
+
+  q.defer(done => {
+    d3.csv('data/life-expectancy.csv',
+      row => ({
+        key: row['Code'],
+        name: row['Entity'],
+        year: row['Year'],
+        life: +row['Life Expectancy at Birth (both genders)']
+      }),
+      data => {
+        data.forEach(row => {
+          if (!row.year || !row.name || !row.life) return;
+
+          let byYear = dataByYear[row.year];
+          if (!byYear) byYear = dataByYear[row.year] = {};
+
+          let country = byYear[row.name];
+          if (!country) country = byYear[row.name] = {};
+
+          country.name = row.name;
+          if (!isNaN(row.life)) country.life = row.life;
+        })
+        done();
+      },
+    )
+  })
+
+  q.defer(done => {
+    d3.csv('data/gdp.csv', data => {
+      data.forEach(row => {
+        let year = row['Year'];
+        if (!year) return;
+
+        let byYear = dataByYear[year];
+        if (!byYear) byYear = dataByYear[year] = {};
+
+        d3.entries(row).forEach(entry => {
+          if (!entry.key || !entry.value) return;
+          if (entry.key === 'Year') return;
+          let name = entry.key.trim();
+
+          let country = byYear[name];
+          if (!country) country = byYear[name] = {};
+
+          country.name = name;
+
+          let gdp = +(entry.value.replace(/,/g, ''));
+          if (!isNaN(gdp)) country.gdp = gdp;
+        })
+        done();
+      })
+    })
+  })
+
+  q.await(() => draw(d3.values(dataByYear['2008'])))
 }
