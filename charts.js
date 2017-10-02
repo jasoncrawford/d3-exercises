@@ -161,7 +161,7 @@ charts.globe = function (selector) {
 charts.scatterPlot = function (selector) {
   const width = 600;
   const height = 600;
-  const margin = 20;
+  const margin = 40;
 
   let svg = d3.select(selector).append('svg')
     .classed('scatter-plot', true)
@@ -189,6 +189,15 @@ charts.scatterPlot = function (selector) {
     let scaleY = d3.scaleLinear()
       .domain([d3.min(data, d => d.gdp), d3.max(data, d => d.gdp)])
       .range([height, 0])
+
+    let xAxis = d3.axisBottom(scaleX);
+    let yAxis = d3.axisLeft(scaleY).tickFormat(d3.format('$.0s'));
+
+    content.append('g')
+      .attr('transform', `translate(0, ${height})`)
+      .call(xAxis);
+
+    content.append('g').call(yAxis);
 
     let selection = content.selectAll('circle.point').data(data);
 
