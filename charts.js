@@ -49,7 +49,7 @@ charts.barChart = function (selector) {
         .attr('y', 2 * lineHeight)
         .text('Source: Datazar')
 
-    let selection = content.selectAll('rect').data(data);
+    let selection = content.selectAll('g.bar-group').data(data);
 
     let groups = selection.enter().append('g')
       .classed('bar-group', true)
