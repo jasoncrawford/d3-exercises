@@ -208,6 +208,17 @@ charts.scatterPlot = function (selector) {
       .attr('cx', d => scaleX(d.life))
       .attr('cy', d => scaleY(d.gdp))
       .attr('r', 5)
+      .on('mouseover', function (d, i) {
+        content.append('text')
+          .classed('label', true)
+          .attr('x', scaleX(d.life))
+          .attr('y', scaleY(d.gdp) - 12)
+          .attr('text-anchor', 'middle')
+          .text(d.name)
+      })
+      .on('mouseout', function (d, i) {
+        content.selectAll('text.label').remove();
+      })
   }
 
   d3.csv('data/country-data.csv', transform, draw);

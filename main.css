@@ -71,6 +71,16 @@ svg a {
 }
 
 .scatter-plot .point {
-    fill: #ce93d8;
-    stroke: #AB47BC;
+  fill: #ce93d8;
+  stroke: #AB47BC;
+}
+
+.scatter-plot .point:hover {
+  fill: #AB47BC;
+  stroke: #8E24AA;
+}
+
+.scatter-plot .label {
+  font-size: 14px;
+  fill: #424242;
 }
