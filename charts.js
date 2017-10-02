@@ -157,3 +157,47 @@ charts.globe = function (selector) {
     })
   })
 }
+
+charts.scatterPlot = function (selector) {
+  const width = 600;
+  const height = 600;
+  const margin = 20;
+
+  let svg = d3.select(selector).append('svg')
+    .classed('scatter-plot', true)
+    .attr('width', width + 2 * margin)
+    .attr('height', height + 2 * margin)
+
+  let content = svg.append('g')
+    .attr('transform', `translate(${margin}, ${margin})`)
+
+  // {Entity: "Albania", Code: "ALB", Year: "2008", Life Expectancy at Birth: "76.281", GDP per capita: "5010.031778"}
+  let transform = row => ({
+    key: row['Code'],
+    name: row['Entity'],
+    life: +row['Life Expectancy at Birth'],
+    gdp: +row['GDP per capita'],
+  })
+
+  let draw = data => {
+    data = data.filter(d => !isNaN(d.life) && !isNaN(d.gdp));
+
+    let scaleX = d3.scaleLinear()
+      .domain([d3.min(data, d => d.life), d3.max(data, d => d.life)])
+      .range([0, width])
+
+    let scaleY = d3.scaleLinear()
+      .domain([d3.min(data, d => d.gdp), d3.max(data, d => d.gdp)])
+      .range([height, 0])
+
+    let selection = content.selectAll('circle.point').data(data);
+
+    selection.enter().append('circle')
+      .classed('point', true)
+      .attr('cx', d => scaleX(d.life))
+      .attr('cy', d => scaleY(d.gdp))
+      .attr('r', 5)
+  }
+
+  d3.csv('data/country-data.csv', transform, draw);
+}

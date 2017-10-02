@@ -21,6 +21,8 @@ svg a {
   fill: #2196f3;
 }
 
+/********** Bar chart **********/
+
 .bar-chart {
   background-color: #f0f0f0;
 }
@@ -45,6 +47,8 @@ svg a {
   fill: #424242;
 }
 
+/********** Globe **********/
+
 .globe .sphere {
   fill: #81d4fa;
   stroke: none;
@@ -58,4 +62,15 @@ svg a {
 .globe .country-path {
   fill: #ece4ad;
   stroke: #b7af79;
+}
+
+/********** Scatter plot **********/
+
+.scatter-plot {
+  background-color: #f0f0f0;
+}
+
+.scatter-plot .point {
+    fill: #ce93d8;
+    stroke: #AB47BC;
 }
